@@ -1,0 +1,86 @@
+2. Spring e Injeção de Dependências
+
+Spring MVC utilizado para web
+
+Spring Boot reune os projetos do Spring.
+
+Especificações padronizão.
+	JPA é uma especificação
+	Hibernate é uma implementaçào do JPA, existem outras.
+
+MAVEN é uma ferramento de gerenciamento de dependencias e automacao de build de projetos java.
+
+to look on terminal:
+./mvnw dependency:tree
+./mvnw dependency:resolve
+
+
+@Controller -> Marcar uma classe como responsável por receber requisicoes web. o @Controller também é um @Component.
+
+@GetMapping -> Mapeia um método da classe, especificando qual o path necessário para aciona-lo.
+
+@ResponsyBody -> Indica que o retorno do método sera convertido para uma resposta http pelo spring.
+
+
+INJEÇÃO DE DEPENDENCIAS:
+	-Baixo acoplamento;
+	-Conceito de polimorfismo.
+
+Spring IoC Container
+	Responsável por fazer a injecao de dependencias, "por trás do panos".	Bean -> Objetos Gerenciados pelo container do spring.
+
+@Component -> Encontre, instancie, configure, injete componentes dessa classe em outros beans.
+	
+	Ao iniciar a aplicação, a classe anotada como @Component, mesmo que essa classe não seja usada em nenhum lugar, ela será instanciada do mesmo jeito pelo Spring, tanto que se adicionar um construtor default na classe chamando um println, verá isso acontecer.
+
+	Geralmente usado em classes como os controladores, serviços e repositórios. Classes utilitárias e entidas geralmente nao são @Component.
+
+@SpringBootApplication -> Anotacao usada em uma casse main raiz do pacote, pois ela indifica, entre outras coisas, que todas as classes anotadas como @Component devem ser scaneadas e startadas pelo container do Spring como beans, isso vale para as classes que estao no mesmo pacote raiz das classe anotada como @SpringBootApplication.
+
+
+Injetar um bean spring dentro de outro bean spring (Pontos de Injeção):
+
+	Uma das formas é injetar via construtor;
+	@Autowired no construtor quando existe mais de um para explicitar qual o correto;
+	@Autowired em um setter;
+	@Autowired no atributo, mesmo ele sendo privado;
+	OBS: O ideal é injetar através do construtor.
+
+
+@Configuration -> Também é um @Component, mas com um objetivo bem claro de servir como arquivo de configuracao de BEANS, normalmente ao final do nome da classe é adicionar o pos-fixo Config.
+
+	@Bean -> Dentro do arquivo anotado como @Configuration, cria-se metodos de denificao, anotados como @Bean para sinalizar ao spring que estes sao metodos que definem os diversos Beans utilizados na apliacao. Dentro do IoC COntainer, por padrao o bean sera nomeado exatamente com o nome do metodo na definicao do bean.
+
+	Uma forma de nao ter que usar o @Component em cada classe para defini-la como um Bean gerencial pelo Spring é justamente criar uma classe de configuracao @Configuration e criar todo os @Beans lá dentro, talvez essa seja uma forma mais organizada.
+
+	ex: 
+		@Configuration
+		public class NotificacaoConfig {
+
+		    @Bean
+		    public NotificadorEmail notificadorEmail() {
+		        NotificadorEmail notificador = new NotificadorEmail("smtp.algamail.com.br");
+		        notificador.setCaixaAlta(true);
+		        return  notificador;
+		    }
+		}
+
+
+@Autowired -> Quando existe mais de um construtor na classe, o @Autowired é usado para explicitar qual construtor deve ser utilizado.
+
+	@Autowired(required = false) -> torna a injeção do Bean opcional na classe que a utiliza, dessa forma, se nao houver um Bean, a aplicação funciona normalmente, contanto que exista uma verificao if else na classe para nao quebrar em tempo de execucao.
+
+Ambiguidade de BEANS:
+
+	Se houver uma interface NOTIFICADOR e duas classes (2 beans) que implementao, ex NotificadorSMS e NotificadorEmail, na classe de serviço, é importante deixar explicito qual BEAN será chamado, uma forma de resolver, é criar uma LISTA desses BEANS e receber todos.
+
+	@Primary -> Utilizado para dar prioridade a um BEAN, a fim de resolver ambiguidade.
+
+	@Qualifier("identificador") -> Usado no BEAN e no local de injeção do BEAN.
+
+	Outra estratégia seria usar Annotation do JAVA, deixando o @Qualifier no Annotation, marcando os BEANS com esse Annotation e utilizando essa anotação para definir qual BEAN tem preferencia na injeção de dependencias.
+
+
+
+
+
