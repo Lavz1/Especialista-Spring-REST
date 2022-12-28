@@ -5,18 +5,28 @@ import com.lavz.algafood.di.notificacao.NivelUrgencia;
 import com.lavz.algafood.di.notificacao.Notificador;
 import com.lavz.algafood.di.notificacao.TipoDoNotificador;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationEventPublisher;
 
-@Component
 public class AtivacaoClienteService {
 
     @Autowired(required = false)
     @TipoDoNotificador(NivelUrgencia.NAO_URGENTE)
     private Notificador notificador;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    public void init(){
+        System.out.println("INIT");
+    }
+
+    public void destroy(){
+        System.out.println("DESTROY");
+    }
+
     public void ativar(Cliente cliente) {
         cliente.ativar();
 
-        notificador.notificar(cliente, "Seu cadastro no sistema está ativo!");
+        eventPublisher.publishEvent(new ClienteAtivadoEvent(cliente));
     }
 }

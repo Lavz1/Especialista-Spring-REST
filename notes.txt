@@ -13,6 +13,7 @@ MAVEN é uma ferramento de gerenciamento de dependencias e automacao de build de
 to look on terminal:
 ./mvnw dependency:tree
 ./mvnw dependency:resolve
+./mvnw package -> gerar arquivo .jar da aplicacao
 
 
 @Controller -> Marcar uma classe como responsável por receber requisicoes web. o @Controller também é um @Component.
@@ -80,6 +81,54 @@ Ambiguidade de BEANS:
 
 	Outra estratégia seria usar Annotation do JAVA, deixando o @Qualifier no Annotation, marcando os BEANS com esse Annotation e utilizando essa anotação para definir qual BEAN tem preferencia na injeção de dependencias.
 
+
+@Profile("prod") - Spring Profiles, Ações realizadas baseada no profile que foi definido. É preciso adicionar no arquivo application.properties o parametro spring.profiles.active=prod ,onde "prod" é o profile criado. Vale ressaltar que a classe marcada como um profile e nao for especificada no properties, a aplicação não ira reconhecer essa classe.
+
+	Para passar o profile por linha de comando, faça:
+	java -jar projeto.jar -Dspring.profiles.active=prod
+	
+Ciclo de vida BEAN -> Inicializacao, fase onde é usado e fase de destruicao (onde ele deixa de existir). Existem duas anotações:
+
+	@PostConstruct -> usado para marcar um método que irá atuar na inicializacao de um BEAN, esse méotodo será chamado após o construtor da classe e injeções.
+
+	@PreDestroy -> Ao parar a aplicação, o método chamado marcado será chamado.
+
+	Outra forma é criar um arquivo de configuração para BEAN e nos parametro da anotacao passar:
+
+		@Bean(initMethod = "init", destroyMethod = "destroy")
+
+
+Padrao de Projeto OBSERVER: Server para deixar o acoplamento das classes mais baixo. Spring implementa essa padrao, chamado Event Handler.
+
+	private ApplicationEventPublisher eventPublisher -> necessário injetar para permitir que o evento possa ser publicado.
+
+	eventPublisher.publishEvent(new ClienteAtivadoEvent()); -> Nesse momento é disparado para o sitema que esse evento foi disparado, e quem tiver ouvindo pode entao seguir com o fluxo, em resumo é um LISTENER.
+
+	@EventListener => usado no método que ficara "escutando" por um evento até que ele seja disparado.
+
+	
+Spring Boot application.properties: Local para alterar propriedades da aplicação, como por exemplo a porta que irá rodar a aplicação server.port=8082
+ 
+ 	Rodar pelo terminar passando parametro:
+	java -jar algafood-api-0.0.1-SNAPSHOT.jar --server.port=8080
+
+	Da para exportar uma variável de ambiente e passar ela como parametro, dessa forma ao iniciar a aplicação pelo terminal com java -jar target/algafood-api-0.0.1-SNAPSHOT.jar, irá subir com o profile especificado na variavel de ambiente:
+
+		export SPRING_PROFILES_ACTIVE=production
+		echo $SPRING_PROFILES_ACTIVE
+
+
+
+@Value -> Injeção do valor de uma propriedades usando uma expression do spring.
+	
+	@Value("${notificador.email.host-servidor}")
+
+
+@ConfigurationProperties: significa que a classe será uma configuração de properties.
+	
+	@ConfigurationProperties("prefixo.propriedade") -> é só injetar esse arquivo onde precisar, lembrando que as propriedades do mesmo podem ser sobrescritas em arquivos .properties e .yml
+
+	
 
 
 
