@@ -1,0 +1,225 @@
+2. Spring e Injeção de Dependências
+
+Spring MVC utilizado para web
+
+Spring Boot reune os projetos do Spring.
+
+Especificações padronizão.
+	JPA é uma especificação
+	Hibernate é uma implementaçào do JPA, existem outras.
+
+MAVEN é uma ferramenta de gerenciamento de dependencias e automacao de build de projetos java.
+
+to look on terminal:
+./mvnw dependency:tree
+./mvnw dependency:resolve
+./mvnw package -> gerar arquivo .jar da aplicacao
+
+
+@Controller -> Marcar uma classe como responsável por receber requisicoes web. o @Controller também é um @Component.
+
+@GetMapping -> Mapeia um método da classe, especificando qual o path necessário para aciona-lo.
+
+@ResponsyBody -> Indica que o retorno do método sera convertido para uma resposta http pelo spring. This annotation enables automatic serialization of the return object into the HttpResponse.
+
+
+INJEÇÃO DE DEPENDENCIAS:
+	-Baixo acoplamento;
+	-Conceito de polimorfismo.
+
+Spring IoC Container
+	Responsável por fazer a injecao de dependencias, "por trás do panos".	Bean -> Objetos Gerenciados pelo container do spring.
+
+@Component -> Encontre, instancie, configure, injete componentes dessa classe em outros beans.
+	
+	Ao iniciar a aplicação, a classe anotada como @Component, mesmo que essa classe não seja usada em nenhum lugar, ela será instanciada do mesmo jeito pelo Spring, tanto que se adicionar um construtor default na classe chamando um println, verá isso acontecer.
+
+	Geralmente usado em classes como os controladores, serviços e repositórios. Classes utilitárias e entidas geralmente nao são @Component.
+
+@SpringBootApplication -> Anotacao usada em uma casse main raiz do pacote, pois ela indifica, entre outras coisas, que todas as classes anotadas como @Component devem ser scaneadas e startadas pelo container do Spring como beans, isso vale para as classes que estao no mesmo pacote raiz das classe anotada como @SpringBootApplication.
+
+
+Injetar um bean spring dentro de outro bean spring (Pontos de Injeção):
+
+	Uma das formas é injetar via construtor;
+	@Autowired no construtor quando existe mais de um para explicitar qual o correto;
+	@Autowired em um setter;
+	@Autowired no atributo, mesmo ele sendo privado;
+	OBS: O ideal é injetar através do construtor.
+
+
+@Configuration -> Também é um @Component, mas com um objetivo bem claro de servir como arquivo de configuracao de BEANS, normalmente ao final do nome da classe é adicionar o pos-fixo Config.
+
+	@Bean -> Dentro do arquivo anotado como @Configuration, cria-se metodos de denificao, anotados como @Bean para sinalizar ao spring que estes sao metodos que definem os diversos Beans utilizados na apliacao. Dentro do IoC COntainer, por padrao o bean sera nomeado exatamente com o nome do metodo na definicao do bean.
+
+	Uma forma de nao ter que usar o @Component em cada classe para defini-la como um Bean gerencial pelo Spring é justamente criar uma classe de configuracao @Configuration e criar todo os @Beans lá dentro, talvez essa seja uma forma mais organizada.
+
+	ex: 
+		@Configuration
+		public class NotificacaoConfig {
+
+		    @Bean
+		    public NotificadorEmail notificadorEmail() {
+		        NotificadorEmail notificador = new NotificadorEmail("smtp.algamail.com.br");
+		        notificador.setCaixaAlta(true);
+		        return  notificador;
+		    }
+		}
+
+
+@Autowired -> Quando existe mais de um construtor na classe, o @Autowired é usado para explicitar qual construtor deve ser utilizado.
+
+	@Autowired(required = false) -> torna a injeção do Bean opcional na classe que a utiliza, dessa forma, se nao houver um Bean, a aplicação funciona normalmente, contanto que exista uma verificao if else na classe para nao quebrar em tempo de execucao.
+
+Ambiguidade de BEANS:
+
+	Se houver uma interface NOTIFICADOR e duas classes (2 beans) que implementao, ex NotificadorSMS e NotificadorEmail, na classe de serviço, é importante deixar explicito qual BEAN será chamado, uma forma de resolver, é criar uma LISTA desses BEANS e receber todos.
+
+	@Primary -> Utilizado para dar prioridade a um BEAN, a fim de resolver ambiguidade.
+
+	@Qualifier("identificador") -> Usado no BEAN e no local de injeção do BEAN.
+
+	Outra estratégia seria usar Annotation do JAVA, deixando o @Qualifier no Annotation, marcando os BEANS com esse Annotation e utilizando essa anotação para definir qual BEAN tem preferencia na injeção de dependencias.
+
+
+@Profile("prod") - Spring Profiles, Ações realizadas baseada no profile que foi definido. É preciso adicionar no arquivo application.properties o parametro spring.profiles.active=prod ,onde "prod" é o profile criado. Vale ressaltar que a classe marcada como um profile e nao for especificada no properties, a aplicação não ira reconhecer essa classe.
+
+	Para passar o profile por linha de comando, faça:
+	java -jar projeto.jar -Dspring.profiles.active=prod
+	
+Ciclo de vida BEAN -> Inicializacao, fase onde é usado e fase de destruicao (onde ele deixa de existir). Existem duas anotações:
+
+	@PostConstruct -> usado para marcar um método que irá atuar na inicializacao de um BEAN, esse méotodo será chamado após o construtor da classe e injeções.
+
+	@PreDestroy -> Ao parar a aplicação, o método chamado marcado será chamado.
+
+	Outra forma é criar um arquivo de configuração para BEAN e nos parametro da anotacao passar:
+
+		@Bean(initMethod = "init", destroyMethod = "destroy")
+
+
+Padrao de Projeto OBSERVER: Server para deixar o acoplamento das classes mais baixo. Spring implementa essa padrao, chamado Event Handler.
+
+	private ApplicationEventPublisher eventPublisher -> necessário injetar para permitir que o evento possa ser publicado.
+
+	eventPublisher.publishEvent(new ClienteAtivadoEvent()); -> Nesse momento é disparado para o sitema que esse evento foi disparado, e quem tiver ouvindo pode entao seguir com o fluxo, em resumo é um LISTENER.
+
+	@EventListener => usado no método que ficara "escutando" por um evento até que ele seja disparado.
+
+	
+Spring Boot application.properties: Local para alterar propriedades da aplicação, como por exemplo a porta que irá rodar a aplicação server.port=8082
+ 
+ 	Rodar pelo terminar passando parametro:
+	java -jar algafood-api-0.0.1-SNAPSHOT.jar --server.port=8080
+
+	Da para exportar uma variável de ambiente e passar ela como parametro, dessa forma ao iniciar a aplicação pelo terminal com java -jar target/algafood-api-0.0.1-SNAPSHOT.jar, irá subir com o profile especificado na variavel de ambiente:
+
+		export SPRING_PROFILES_ACTIVE=production
+		echo $SPRING_PROFILES_ACTIVE
+
+
+
+@Value -> Injeção do valor de uma propriedades usando uma expression do spring.
+	
+	@Value("${notificador.email.host-servidor}")
+
+
+@ConfigurationProperties: significa que a classe será uma configuração de properties.
+	
+	@ConfigurationProperties("prefixo.propriedade") -> é só injetar esse arquivo onde precisar, lembrando que as propriedades do mesmo podem ser sobrescritas em arquivos .properties e .yml
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+3. Introducao ao JPA e Hibernate
+
+
+@Entity -> Indica que uma classe em java representa uma tabela no banco de dados
+
+@Id -> Toda classe/tabela precisa de uma chave única
+
+@GeneratedValue(strategy = GenerationType.IDENTITY) -> tonar o @Id um autoincrement, deixar essa responsabilidade para o banco gerar a chave primaria
+
+@Table(name = pessoa)  
+public class Pessoa {}  -> Por padrao o nome da classe é vinculado com o nome da tabela no banco, contudo, podemos especificar que no banco é um nome X e a classe no chave um nome Y.
+
+@Column(name = "nom_pessoa")
+private String nome;
+
+@Column(nullable = false) -> nao permitir nulo, geralmente essas propriedades sao usadas quando o DDL do banco é gerado a partir da classe, mas se for mapeamento de uma banco e tabela ja existente, nao há necessidade.
+
+@JoinColumn(name = "cozinha_codigo") -> Diz ao hibernate para mapear uma dada coluna do banco com o nome cozinha_codigo
+
+.properties:
+	server.port=8081
+	spring.datasource.url=jdbc:mysql://127.0.0.1:3306/algafood?serverTimezone=UTC
+	spring.datasource.username=root
+	spring.datasource.password=rootpass
+
+	spring.jpa.generate-ddl=true
+	spring.jpa.hibernate.ddl-auto=update
+
+	spring.jpa.show-sql=true
+	spring.jpa.properties.hibernate.format_sql=true
+	spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+
+@PersistenceContext -> usado geralmente em um EntityManager, outra opção seria usar o @Autowired, porém @PersistenceContext é mais adequado.
+
+entityManager.createQuery("from Cozinha", Cozinha.class); -> Dentro da query não é usado um SQL conforme de costume e sim um JPQL (uma linguagemd e consulta do JPA), é uma escrita parecida, contudo ela faz a consulta em OBJETOS e nao em TABELAS.
+
+
+->  ApplicationContext applicationContext = new SpringApplicationBuilder(AlgafoodApiApplication.class)
+                .web(WebApplicationType.NONE)
+                .run(args);
+
+    O trecho acima é colocado dentro de uma classe main para subir a aplicação Spring localmente sem que espera requisicoes, é mais para um ambiente de testes rapidos.
+
+
+@Transactional: 
+	
+	Indica que o método será executado dentro de uma transação.
+
+
+Padrão Aggregate do DDD -> Uma abordagem de desenvolvimento de software para criar software com foco no dominio, no negocio. Exemplo, duas entidades PEDIDO e ITEM PEDIDO, o PEDIDO é o aggregate root, pois ele engloba o item pedido.
+
+
+Padrao Repository ->  É mais um padrao do DDD que adiciona uma camada de abstração de acesso aos dados. É como se fosse uma coleção.
+
+	É um repository por agregado!
+
+
+LOMBOK: Biblioteca java para evitar codigos boiler plate
+	https://projectlombok.org/features/
+
+	@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+	@EqualsAndHashCode.Include
+
+
+MAPEAMENTO:
+
+	@ManyToOne (Muitos pra um): O Many é para a classe PAI e o ONE e para a classe 'anexada' à classe pai, ou seja, um atributo. Nesse relacionamento, a chave entrangeira fica do lado N ou MANY.
+
+
+
+

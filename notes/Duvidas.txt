@@ -1,0 +1,15 @@
+duvidas
+
+@RequestMapping vs @GetMapping
+
+
+@Controller vs @RestController:
+
+	@Controller requires @ResponsyBody!
+
+	@RestController ->  The controller is annotated with the @RestController annotation; therefore, the @ResponseBody isn't required.
+	Every request handling method of the controller class automatically serializes return objects into HttpResponse.
+
+
+
+

@@ -1,0 +1,71 @@
+3. Introducao ao JPA e Hibernate
+
+@Entity -> Indica que uma classe em java representa uma tabela no banco de dados
+
+@Id -> Toda classe/tabela precisa de uma chave única
+
+@GeneratedValue(strategy = GenerationType.IDENTITY) -> tonar o @Id um autoincrement, deixar essa responsabilidade para o banco gerar a chave primaria
+
+@Table(name = pessoa)  
+public class Pessoa {}  -> Por padrao o nome da classe é vinculado com o nome da tabela no banco, contudo, podemos especificar que no banco é um nome X e a classe no chave um nome Y.
+
+@Column(name = "nom_pessoa")
+private String nome;
+
+@Column(nullable = false) -> nao permitir nulo, geralmente essas propriedades sao usadas quando o DDL do banco é gerado a partir da classe, mas se for mapeamento de uma banco e tabela ja existente, nao há necessidade.
+
+@JoinColumn(name = "cozinha_codigo") -> Diz ao hibernate para mapear uma dada coluna do banco com o nome cozinha_codigo
+
+.properties:
+	server.port=8081
+	spring.datasource.url=jdbc:mysql://127.0.0.1:3306/algafood?serverTimezone=UTC
+	spring.datasource.username=root
+	spring.datasource.password=rootpass
+
+	spring.jpa.generate-ddl=true
+	spring.jpa.hibernate.ddl-auto=update
+
+	spring.jpa.show-sql=true
+	spring.jpa.properties.hibernate.format_sql=true
+	spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+
+@PersistenceContext -> usado geralmente em um EntityManager, outra opção seria usar o @Autowired, porém @PersistenceContext é mais adequado.
+
+entityManager.createQuery("from Cozinha", Cozinha.class); -> Dentro da query não é usado um SQL conforme de costume e sim um JPQL (uma linguagemd e consulta do JPA), é uma escrita parecida, contudo ela faz a consulta em OBJETOS e nao em TABELAS.
+
+
+->  ApplicationContext applicationContext = new SpringApplicationBuilder(AlgafoodApiApplication.class)
+                .web(WebApplicationType.NONE)
+                .run(args);
+
+    O trecho acima é colocado dentro de uma classe main para subir a aplicação Spring localmente sem que espera requisicoes, é mais para um ambiente de testes rapidos.
+
+
+@Transactional: 
+	
+	Indica que o método será executado dentro de uma transação.
+
+
+Padrão Aggregate do DDD -> Uma abordagem de desenvolvimento de software para criar software com foco no dominio, no negocio. Exemplo, duas entidades PEDIDO e ITEM PEDIDO, o PEDIDO é o aggregate root, pois ele engloba o item pedido.
+
+
+Padrao Repository ->  É mais um padrao do DDD que adiciona uma camada de abstração de acesso aos dados. É como se fosse uma coleção.
+
+	É um repository por agregado!
+
+
+LOMBOK: Biblioteca java para evitar codigos boiler plate
+	https://projectlombok.org/features/
+
+	@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+	@EqualsAndHashCode.Include
+
+
+MAPEAMENTO:
+
+	@ManyToOne (Muitos pra um): O Many é para a classe PAI e o ONE e para a classe 'anexada' à classe pai, ou seja, um atributo. Nesse relacionamento, a chave entrangeira fica do lado N ou MANY.
+
+
+
+
