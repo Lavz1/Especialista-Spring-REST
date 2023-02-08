@@ -215,6 +215,8 @@ LOMBOK: Biblioteca java para evitar codigos boiler plate
 	@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 	@EqualsAndHashCode.Include
 
+	@Data -> Gera também o construtor da classe contendo os atributos obrigatórios (@NonNull)
+
 
 MAPEAMENTO:
 
@@ -223,3 +225,106 @@ MAPEAMENTO:
 
 
 
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+4. REST com Srping
+
+REST -> é uma especificao que define a forma de comunicacao entre componenetes de software na web, independente da linguagem de programacao utilizada.
+
+constraints:
+	cliente-servidor
+	stateless
+	cache
+	interface uniforme
+	sistema em camadas
+	código sobre demanda
+
+REST vs RESTFUL: REST é a especificação, RESTFUL seria a aplicação dos conceitos REST 100% em conformidade à especificação.
+
+Protocolo HTTP:
+
+	Protocolo requisição-resposta;
+
+	Composicao da requisicao:
+
+		[MÉTODO] [URI] HTTP/[Versao]  	POST /produtos HTTP 1.1
+		[Cabeçalhos]					Content-Type: application/json      Content-type indica que o conteudo que está indo no corpo da requisicao é JSON, importante pro servidor saber como interpretar.
+										Accept: application/json			Accept: Indica os formatos aceitos como resposta, no caso o servidor deve retornar a resposta em JSON.
+		[CORPO/PAYLOAD]					
+										{
+											"nome": "Notebook i7",
+											"preco": 2100.0
+										}
+
+
+	telnet www.uol.com.br 80   -> porta 80 é padrao para HTTP, normalmente HTTPS é a 443
+
+	GET / HTTP/1.1
+	Host: www.uol.com.br
+	Accept: text/html
+
+
+	GET / HTTP/1.1
+	Host: https://www.uol.com.br/
+	Accept: text/html
+
+
+
+@RestController: Engloba o @Controller e o @ResponseBody (responsável por dizer que a respostas dos métodos do controller serão enviados no corpo (body) da requisição).
+
+Representação de recurso (Content Negotiation): Quem faz a requisição para o servidor especifica um MEDIA TYPE aceito como resposta(JSON, XML etc) e a API tem que estar preparada para aceitar e responder no MEDIA TYPE requisitado.
+
+	
+	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) -> especificar o tipo de serializacao da resposta do metodo.
+
+
+	@PathVariable -> Usado para informar ao método o parametro vindo no path da requisição:
+
+		@GetMapping("/{id}")
+	    public Cozinha buscar(@PathVariable("id") Long cozinhaId) {
+	        return cozinhaRepository.porId(cozinhaId);
+	    }
+
+
+CLASSES MODELO DE DOMINIO e CLASSES MODELO DE REPRESENTAÇÃO:
+
+	a Classe modelo de representação é a classe que é serializada como resposta em uma requisicao HTTP, é o mais indicado. Contudo, acontece de classes de Modelo também servir como modelo de representação, mas não é uma boa pratica.
+
+
+@JsonProperty("titulo") -> Indica que o campo da classe será retornado com este nome na resposta da requisicao HTTP
+	
+@JsonIgnore -> indica que o campo da classe não fará parte do corpo da resposta na requisicao HTTP.
+
+@JsonRootName("gastronomia") -> usado no topo da classe para informar que este será o nome do elemento raiz na resposta da requisicao HTTP.
+ 
+@JacksonXmlElementWrapper(useWrapping = false) -> remover o wrapper na resposta XML, é mais para personalização, não é algo muito usado dado que a forma de resposta mais comum é JSON.
+
+
+Métodos HTTP:
+
+	PUT -> é utilizado para atualizar um recurso, no corpo da requisicao vai o atributo que será atualizado, mas por trás da API é necessário atualizar todos os atributos já existente desse recurco, caso contrário fica como nullo / vazio.  
+
+	PATCH -> atualizar um recurso parcialmente, implementação mais complexa que o PUT.
+
+	OPTIONS -> consultar os métodos HTTP disponiveis para aquele recurso.
+
+
+@ResponseStatus(HttpStatus.CREATED) -> Usado no método para especificar o código http que será retornado ao consumidor da API quando o endpoint for acionado.
+
+MODELO DE REPRESENTACAO != MODELO DE DOMINIO;
+
+@ResquestBody -> Pega o corpo da requisição e transforma em um objeto.
+
+
+
+-- INICIAR AULA 4.25
