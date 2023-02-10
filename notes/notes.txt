@@ -312,7 +312,7 @@ CLASSES MODELO DE DOMINIO e CLASSES MODELO DE REPRESENTAÇÃO:
 
 Métodos HTTP:
 
-	PUT -> é utilizado para atualizar um recurso, no corpo da requisicao vai o atributo que será atualizado, mas por trás da API é necessário atualizar todos os atributos já existente desse recurco, caso contrário fica como nullo / vazio.  
+	PUT -> é utilizado para atualizar um recurso como um todo, no corpo da requisicao vai o atributo que será atualizado, mas por trás da API é necessário atualizar todos os atributos já existente desse recurco, caso contrário fica como nullo / vazio.  
 
 	PATCH -> atualizar um recurso parcialmente, implementação mais complexa que o PUT.
 
@@ -325,6 +325,25 @@ MODELO DE REPRESENTACAO != MODELO DE DOMINIO;
 
 @ResquestBody -> Pega o corpo da requisição e transforma em um objeto.
 
+BeanUtils.copyProperties(cozinha, cozinhaAtual, "id");
 
 
--- INICIAR AULA 4.25
+Camada de DOMAINS SERVICES: é uma operacao sem estado que realiza uma tarefa especifica do dominio.
+
+	Em vez do controller fazer operações, verificações e chamar diretamente o Repository para persistir no banco, é interessante que haja uma camada intermediário entre o Controller e o Repository, no caso a camada de Domain Service, onde ficam as regras de negócio.
+
+
+@Service é também um @Component, porém é mais coeso/semantico para classes de serviço
+
+
+Serializar:
+
+	Transformar um objeto em um fluxo de bytes (strem of bytes) para que possa ser armazenado e transmitido. No ponta A ele é serializado e no ponto B deserialziado. 
+
+
+PATCH: ATUALIZAR PARCIALMENTE UM RECURSO;
+
+	a Diferença do PATCH para o PUT é que no PUT, se você nao adicionar uma propriedade, ela será entendida como NULA, enquanto no PATCH, se não adicionar uma propriedade, será entendido que simplismente não é para alterar o valor desta propriedade.
+
+
+-- INICIAR AULA 4.34
