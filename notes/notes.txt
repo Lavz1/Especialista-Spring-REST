@@ -346,4 +346,115 @@ PATCH: ATUALIZAR PARCIALMENTE UM RECURSO;
 	a Diferença do PATCH para o PUT é que no PUT, se você nao adicionar uma propriedade, ela será entendida como NULA, enquanto no PATCH, se não adicionar uma propriedade, será entendido que simplismente não é para alterar o valor desta propriedade.
 
 
--- INICIAR AULA 4.34
+API REFLECTIONS: Capacidade que temos de inspecionar objetos java em tempo de execucao e até alterar esses objetos em tempo de execução de forma dinâmica.
+
+	public void merge(Map<String, Object> camposOrigem, Restaurante restauranteDestino) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Restaurante restauranteOrigem = objectMapper.convertValue(camposOrigem, Restaurante.class);
+
+		camposOrigem.forEach((nomePropriedade, valorPropriedade) -> {
+			Field field = ReflectionUtils.findField(Restaurante.class, nomePropriedade);
+			field.setAccessible(true);
+
+			Object novoValor = ReflectionUtils.getField(field, restauranteOrigem);
+
+			System.out.println(nomePropriedade + " = " + valorPropriedade + " = " + novoValor);
+
+			ReflectionUtils.setField(field, restauranteDestino, novoValor);
+		});
+	}
+
+
+
+Modelo de maturidade de Richardson (RMM)
+
+	GLÓRIA DO REST:
+
+		Nível 3: HATEOAS
+		Nível 2: Verbos HTTP
+		Nível 1: Recusos
+		Nível 0: POX
+
+
+		Nível 0: Mais rudimentar, não usa os verbos HTTP de forma correta, usa o protocolo HTTP apenas para comunicação. Normalmente um único endpoint é usado para diversas requisições.
+		As respostas HTTP também são erradas, um erro dado na api retorna um http 200 OK.
+
+		Nível 1: Relizar requisições para URIS que identificam recursos, não é mais um unico endpoint, contudo os Métodos HTTP e Respostas HTTP não são utilizados corretamente.
+
+		Nível 2: É considerado REST para o desenvolvedores mais pragmáticos, os métodos HTTP, Respostas HTTp e endpoints sao usados corretamentos, a maioria das APIS se encontram nessa fase. 
+
+		Nível 3: HATEOAS (Hypertext As The Engine Of Application State). Os recursos trazem campo com links para direcionar os consumidores das APIS, como se fosse uma página HTML com links para outras sessoes dentro do site.
+		
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- 5. SUPER PODERES DO SPRING DATA JPA.
+
+@Repository -> anotação que identifica uma classe como repositorio, que é um @Component e possui algumas tratamentos de erros, também adiciona semantica à classe.
+
+
+SPRING DATA JPA:
+
+	Fornece formas de evitar CRUDS boilerplates, ou seja, aquelas consultas básicas de todo banco, basta herdar uma interface JpaRepository.
+
+
+QUERY METHODS extendendo JPAREPOSITORY  from SRPING DATA JPA: Aqui o nome do método define como será realizado a busca no banco.
+	
+	Usa-se keyword para montar os métodos e indicar sua ação
+	https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation
+
+	nome, findByNome,  findTodasByNomeContaining(String nome), findByNomeContainingAndCozinhaId(String nomeRestaurante, Long CozinhaId);
+
+
+Query Nomeada:
+
+	@Query("passa o jpql")
+	@Param para bindar parametro com nome de variavel
+
+	@Query("from Restaurante where nome like %:nome% and cozinha.id=:id")
+    List<Restaurante> consultarPorNome(String nome, @Param("id") Long cozinhaId);
+
+
+RestauranteRepositoryImpl, o sufixo Impl é necessário pois ao usar o SPRING DATA JPA, ele consegue fazer um bind da Interface com a classe que implementa o método, mesmo que essa classe nao implemente a interface explicitamente!
+
+
+CriteriaQuery -> Uma outra forma de fazer consulta no banco, é um pouco mais custosa de escrever porém é mais poderosa do que o jpql.
+
+	@Override
+    public List<Restaurante> find(String nome, BigDecimal taxaFreteInicial, BigDecimal taxaFreteFinal) {
+
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<Restaurante> criteria = builder.createQuery(Restaurante.class);
+        Root<Restaurante> root =  criteria.from(Restaurante.class); // from Restaurantes
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        Predicate defaultQuery = builder.equal(builder.literal(0),0 );
+        predicates.add(defaultQuery);
+
+        if(StringUtils.hasLength(nome))
+            predicates.add(builder.like(root.get("nome"), "%" + nome + "%"));
+
+        if (taxaFreteInicial != null)
+            predicates.add(builder.greaterThanOrEqualTo(root.get("taxaFrete"), taxaFreteInicial));
+
+        if (taxaFreteFinal != null)
+            predicates.add(builder.lessThanOrEqualTo(root.get("taxaFrete"), taxaFreteFinal));
+
+        criteria.where(predicates.toArray(new Predicate[0]));
+
+        TypedQuery<Restaurante> query= entityManager.createQuery(criteria);
+
+        return query.getResultList();
+    }
+
+
+--- COMECAR AULA 5.16
+2h50  DEVENDO

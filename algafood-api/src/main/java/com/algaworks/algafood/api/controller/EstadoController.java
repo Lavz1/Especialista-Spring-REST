@@ -1,6 +1,7 @@
 package com.algaworks.algafood.api.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.algaworks.algafood.domain.exception.EntidadeEmUsoException;
 import com.algaworks.algafood.domain.exception.EntidadeNaoEncontradaException;
@@ -29,7 +30,7 @@ public class EstadoController {
 	
 	@GetMapping
 	public List<Estado> listar() {
-		return estadoRepository.listar();
+		return estadoRepository.findAll();
 	}
 
 
@@ -47,16 +48,16 @@ public class EstadoController {
 	@PutMapping("{id}")
 	public ResponseEntity<?> atualizar(@PathVariable("id") Long estadoId, @RequestBody Estado estado) {
 		try {
-			Estado estadoAtual = estadoRepository.buscar(estadoId);
+			Optional<Estado> estadoAtual = estadoRepository.findById(estadoId);
 
-			if (estadoAtual == null) {
+			if (estadoAtual.isEmpty()) {
 				return ResponseEntity.notFound().build();
 			}
 
-			BeanUtils.copyProperties(estado, estadoAtual, "id");
+			BeanUtils.copyProperties(estado, estadoAtual.get(), "id");
 
-			estadoAtual = cadastroEstados.salvar(estadoAtual);
-			return ResponseEntity.ok(estadoAtual);
+			Estado estadoSalvo = cadastroEstados.salvar(estadoAtual.get());
+			return ResponseEntity.ok(estadoSalvo);
 
 		} catch (EntidadeNaoEncontradaException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());

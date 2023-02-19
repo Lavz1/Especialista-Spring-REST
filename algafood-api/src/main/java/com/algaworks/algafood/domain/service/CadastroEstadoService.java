@@ -23,7 +23,7 @@ public class CadastroEstadoService {
     public Estado salvar(Estado estado) {
 
         try {
-            return estadoRepository.salvar(estado);
+            return estadoRepository.save(estado);
         } catch (DataIntegrityViolationException e) {
             throw new PropriedadeNulaException(
                     String.format("O campo %s deve ser informado", e.getMessage())
@@ -34,7 +34,7 @@ public class CadastroEstadoService {
 
     public void excluir(Long estadoId) {
         try {
-            estadoRepository.remover(estadoId);
+            estadoRepository.deleteById(estadoId);
 
         } catch (EmptyResultDataAccessException e) {
             throw new EntidadeNaoEncontradaException(
