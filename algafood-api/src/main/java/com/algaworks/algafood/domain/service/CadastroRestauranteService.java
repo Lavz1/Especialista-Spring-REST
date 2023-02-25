@@ -1,41 +1,33 @@
 package com.algaworks.algafood.domain.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.algaworks.algafood.domain.exception.EntidadeNaoEncontradaException;
-import com.algaworks.algafood.domain.exception.PropriedadeNulaException;
 import com.algaworks.algafood.domain.model.Cozinha;
 import com.algaworks.algafood.domain.model.Restaurante;
 import com.algaworks.algafood.domain.repository.CozinhaRepository;
 import com.algaworks.algafood.domain.repository.RestauranteRepository;
-import org.hibernate.PropertyValueException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class CadastroRestauranteService {
 
-    @Autowired
-    private RestauranteRepository restauranteRepository;
+	@Autowired
+	private RestauranteRepository restauranteRepository;
+	
+	@Autowired
+	private CozinhaRepository cozinhaRepository;
 
-    @Autowired
-    private CozinhaRepository cozinhaRepository;
+	public Restaurante salvar(Restaurante restaurante) {
+		Long cozinhaId = restaurante.getCozinha().getId();
 
-    public Restaurante salvar(Restaurante restaurante) {
-        Long cozinhaId = restaurante.getCozinha().getId();
-        Cozinha cozinha = cozinhaRepository.findById(cozinhaId)
-                .orElseThrow(() ->  new EntidadeNaoEncontradaException(
-                String.format("Não existe cadastro de cozinha com código %d", cozinhaId)
-        ));
+		Cozinha cozinha = cozinhaRepository.findById(cozinhaId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format("Não existe cadastro de cozinha com código %d", cozinhaId)));
 
-        try {
-            restaurante.setCozinha(cozinha);
-            return restauranteRepository.save(restaurante);
-        } catch (DataIntegrityViolationException e) {
-            throw new PropriedadeNulaException(
-                    String.format("O campo %s deve ser informado", e.getMessage())
-            );
-        }
-    }
+		restaurante.setCozinha(cozinha);
+
+		return restauranteRepository.save(restaurante);
+	}
+
 }

@@ -1,17 +1,13 @@
 package com.algaworks.algafood.domain.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-import com.fasterxml.jackson.annotation.JsonRootName;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@JsonRootName("cozinha")
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
@@ -24,5 +20,11 @@ public class Cozinha {
 	
 	@Column(nullable = false)
 	private String nome;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "cozinha")
+	private List<Restaurante> restaurantes = new ArrayList<>();
+
+
 	
 }

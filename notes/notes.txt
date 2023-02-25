@@ -456,5 +456,47 @@ CriteriaQuery -> Uma outra forma de fazer consulta no banco, é um pouco mais cu
     }
 
 
---- COMECAR AULA 5.16
-2h50  DEVENDO
+Padrao Specification -> a ideia é ter pequenas classes responsável por montar os filtros.
+
+	JpaSpecificationExecutor<ClassName>
+	Specification<ClassName>
+
+
+@Lazy -> normalmente utilizado para evitar referencia circular, diz ao container do spring para instanciar uma classe somente no momento em que for utiliza-la, no maioria dos casos, em tempo de exeucao o spring ja tera uma instanciacao da classe principal e ira utiliza-la.
+
+@NoRepositoryBean -> Diz ao spring para nao instanciar a interface como um repositorio.
+
+Customizar o repositório base de forma que podemos ter uma consulta genérica que pode ser utilizada a qualquer momento por qualquer classe.
+	
+	1. Após criar a estrutura é preciso passar a anotação no arquivo AlgafoodApiApplication, classe de start do projeto:
+		@EnableJpaRepositories(repositoryBaseClass = CustomJpaRepositoryImpl.class)
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
+
+
+
+@JsonIgnore -> Indica que quando for serializar o modelo de representação na resposta de uma requisicao HTTP, ignore aquela propriedade, ou seja, ela nao será enviada na resposta.
+
+@OneToMany(mappedBy = "cozinha") -> indica qual o atributo que mapeia a classe Origem na classe Destino.
+
+
+@JoinTable(name = "restaurante_forma_pagamento",
+	joinColumns = @JoinColumn(name="restaurante_id"),
+	inverseJoinColumns = @JoinColumn(name="forma_pagamento_id"))
+
+	essa anotação @JoinTable é utilizada para mapear um relacionamento N para N onde uma tabela intermediaria é criada. A propriedade "joinColumn" especifica como deverá ser chamado o id da tabela origem lá na tabela intermediaria, e o "inverseJoinColumns" o oposto.
+
+@Embeddable -> Indica que uma classe pode ser incorporada a uma entidade, que ela é parte de uma outra entidade, nao uma entidade em si, e todas a propriedades dessa classe sao refletidas na tabela da classe que incorpora essa clase embeddable.
+
+@Embedded -> é criado um atributo na classe que incorpora o embeddable para dizer que esta classe será parte de sua estrutura no banco.
+
+
+--- COMECAR 6.6
+
+3h11  DEVENDO
