@@ -478,7 +478,7 @@ Customizar o repositório base de forma que podemos ter uma consulta genérica q
 
 --------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------
-
+6. EXPLORANDO MAIS DO JPA E HIBERNATE
 
 
 @JsonIgnore -> Indica que quando for serializar o modelo de representação na resposta de uma requisicao HTTP, ignore aquela propriedade, ou seja, ela nao será enviada na resposta.
@@ -497,6 +497,87 @@ Customizar o repositório base de forma que podemos ter uma consulta genérica q
 @Embedded -> é criado um atributo na classe que incorpora o embeddable para dizer que esta classe será parte de sua estrutura no banco.
 
 
---- COMECAR 6.6
+@CreationTimestamp -> assim que um registro foi criado (foi salvo pela primeira vez), a propriedade anotada irá registro o LocalDateTime.
+@UpdateTimestamp -> salvar LocalDateTime sempre que a propriedade for atualizada
 
-3h11  DEVENDO
+@Column(columnDefinition = "datetime") -> quando "datatime" é informado sem parametros, por definicao os milessegundos sao truncados e nao informado
+
+
+
+EAGER LOADING: (carregamento antecipado, ansioso)
+	
+	Todos atributos que sao marcados com @*toOne usam a estrategia eager loading.
+	As vezes, dependendo a situação, uma tela que era para ser simples pode demorar muitos minutos para carregar por conta dessa estrategia do EAGER LOADING.
+
+
+LAZY LOADING (Carregamento preguiço), só vai acontecer quando a gente realmente foi utilizar a entidade vinculada.
+
+	Todos atributos que sao marcados com @*toMany usam a estrategia lazy loading.
+
+	Restaurante tem Cozinha, no lazy, ao buscar por restaurantes a QUERY da cozinha realizado pelo Hibernate não acontecerá, a nao ser que algum método de cozinha seja explicitamente chamado,
+	como no caso:  restaurante.getCozinha().getNome().
+
+
+
+Mudar a estratégia de FETCHING do EAGER E LAZY LOADING
+
+	@ManyToOne(fetch = FetchType.LAZY)   -> por padrao é EAGER, mas foi alterado para LAZY.
+
+
+@JsonIgnoreProperties("hibernateLazyInitializer") -> Utilizado para ignorar uma pripriedade dentro da entidade no momento da serializacao.
+
+
+@ManyToOne:
+ 	Quando é realizado um join pelo JPQL nesse tipo de associacao, fica implicito o FETCH, mas por via das duvidas é melhor deixar explicito. Esse "fetch" automatico nao acontece de forma implicita no @ManyToMany.
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+7. Pool de conexoes com Flyway.
+
+	Uma aplicaçao sem pool de conexão, toda vez que a apliacao precisa acionar o banco é criado uma conexão que é fechada assim que a resposta for retornada para o consumidor da API. A ideia do pool de conexões é manter uma centar quantidade de conexões já abertas, que não serão encerradas assim que forem utilizadas.
+
+A biblioteca do spring boot start data jpa tras um dependencia do HIKARICP que implementa o pool de conexões com o banco.
+
+	spring.datasource.hikari.maximum-pool-size=5
+	spring.datasource.hikari.minimum-idle=3
+	spring.datasource.hikari.idle-timeout=10000
+
+	
+Apache http server para realizar várias requisicoes no banco.
+No terminal: 
+	apt install apache2-utils
+	ab -n 4000 -c 3 api.algafood.local:8081/restaurantes
+
+
+Flyway -> ferramenta de versionamento de schemas de banco de dados.
+
+	1. As migrações ficam dentro de uma pasta esperada pelo FLYWAY, dentro de resources criar db/migration;
+	2. Os nomes dos arquivos de migrações possuem uma sintaxe para serem lidos:
+
+		V[numero_da_versao]__criacao-inicial.sql
+
+
+Dump de banco de dados (MYSQL)
+
+	Para fazer um dump (backup dos dados) do database "algafood" no MySQL, use o seguinte comando:
+
+	mysqldump --host localhost --user root --password --databases algafood > dump.sql
+	Para criar o database "algafood" a partir do dump, execute o comando:
+
+	mysql --host localhost --user root --password < dump.sql
+
+
+PROPRIEDADE PARA GERAR OS SCRIPTS DE CRIACAO DO BANCO A PARTIR DO MAPEAMENTOS DAS CLASSES JAVA:
+	
+	spring.jpa.properties.javax.persistence.schema-generation.scripts.action=create
+	spring.jpa.properties.javax.persistence.schema-generation.scripts.create-target=src/main/resources/ddl.sql
+
+
+
+	--- COMECAR 7.10
+2h 23m  DEVENDO
